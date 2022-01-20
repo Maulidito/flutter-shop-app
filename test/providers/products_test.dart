@@ -3,11 +3,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/providers/orders.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:shop_app/providers/product.dart';
 import 'package:shop_app/providers/products.dart';
+import 'package:shop_app/firebase_options.dart';
 
-void main() {
+void main() async {
   group("Add and delete product to Firebase", () {
     var prodClass = Products();
     final prod = Product(
@@ -45,6 +46,9 @@ void main() {
   }, skip: true);
 
   test('Get Product From Firebase', () async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
     var prod = Products();
     var status = 0;
     try {
@@ -55,7 +59,7 @@ void main() {
     }
 
     expect(prod.items.isEmpty, false);
-  }, skip: true);
+  }, skip: false);
 
   test('Update Product From Firebase', () async {
     var prod = Products();
