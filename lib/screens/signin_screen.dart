@@ -23,7 +23,7 @@ class _SigninScreenState extends State<SigninScreen> {
     final _width = MediaQuery.of(context).size.width;
     return Form(
       key: _form,
-      child: Container(
+      child: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(vertical: 40, horizontal: 40),
           child: Column(
