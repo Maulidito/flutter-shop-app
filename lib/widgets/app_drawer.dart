@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
+import 'package:shop_app/screens/auth_screen.dart';
 import 'package:shop_app/screens/orders_screen.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
 import 'package:shop_app/screens/product_overview_screen.dart';
@@ -41,6 +44,20 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context).pushNamed(UserProductScreen.routeName);
               Scaffold.of(context).openEndDrawer();
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.logout_outlined),
+            title: Text("Sign Out"),
+            onTap: () async {
+              try {
+                Scaffold.of(context).openEndDrawer();
+                await Provider.of<Auth>(context, listen: false).logout();
+                Navigator.of(context).pushNamed(AuthScreen.routeName);
+              } catch (e) {
+                debugPrint(e.toString());
+              }
             },
           )
         ],

@@ -10,6 +10,14 @@ class Products with ChangeNotifier {
   final List<Product> _items = [];
   var showFavorite = false;
 
+  late final String? token;
+
+  Products({this.token});
+
+  void updateToken(int token) {
+    token = token;
+  }
+
   void firebaseVer() async {
     DatabaseReference ref = FirebaseDatabase.instance.ref("/products");
 
@@ -21,12 +29,12 @@ class Products with ChangeNotifier {
   Future<void> fetchSetProduct() async {
     firebaseVer();
 
-    final url = Uri.parse(Firebase.urlFirebase + '/products.json');
+    final url = Uri.parse(Firebase.urlFirebase + '/products.json?auth=$token');
     debugPrint("FETCHING THE PRODUCT");
     try {
       final response = await http.get(url);
       final rawData = jsonDecode(response.body) as Map<String, dynamic>;
-
+      debugPrint(" raw data : ${rawData.toString()}");
       _items.clear();
       rawData.forEach((prodId, value) {
         _items.add(Product(
@@ -70,8 +78,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product prod) async {
-    final url = Uri.parse(Firebase.urlFirebase + '/products.json');
-
+    final url = Uri.parse(Firebase.urlFirebase + '/products.json?auth=$token');
+    debugPrint("Token : $token");
     try {
       final newProduct = Product(
           title: prod.title,
@@ -97,7 +105,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = Uri.parse(Firebase.urlFirebase + '/products/$id.json');
+    final url =
+        Uri.parse(Firebase.urlFirebase + '/products/$id.json?auth=$token');
     try {
       await http.delete(url).then((value) {
         _items.removeWhere((element) => element.id == id);
@@ -115,8 +124,8 @@ class Products with ChangeNotifier {
 
     try {
       if (prodIndex >= 0) {
-        final url =
-            Uri.parse(Firebase.urlFirebase + '/products/${prod.id}.json');
+        final url = Uri.parse(
+            Firebase.urlFirebase + '/products/${prod.id}.json?auth=$token');
         await http.patch(url, body: jsonEncode(productToJson(prod)));
         _items[prodIndex] = prod;
       } else {

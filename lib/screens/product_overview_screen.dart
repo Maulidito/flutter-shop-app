@@ -81,6 +81,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
               return Center(child: CircularProgressIndicator.adaptive());
             } else {
               if (dataSnapshot.error != null) {
+                debugPrint("data Snapshot ERROR ${dataSnapshot.error}");
                 return Center(
                   child: Text("something went wrong"),
                 );

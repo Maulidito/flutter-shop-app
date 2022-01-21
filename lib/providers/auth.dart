@@ -4,6 +4,7 @@ import 'package:shop_app/models/user.dart' as account;
 
 class Auth with ChangeNotifier {
   FirebaseAuth auth = FirebaseAuth.instance;
+  String? token;
   late final account.User acc;
 
   void authStateChange() {
@@ -23,12 +24,12 @@ class Auth with ChangeNotifier {
       final res = await auth.signInWithEmailAndPassword(
           email: email, password: password);
 
-      debugPrint("asdasdas");
+      token = await res.user?.getIdToken(false);
+      debugPrint("Login Token $token");
       account.User(
           name: res.user?.displayName ?? "", email: email, password: password);
     } catch (e) {
       throw e;
-      debugPrint("check in 2");
     }
   }
 

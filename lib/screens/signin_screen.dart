@@ -94,6 +94,7 @@ class _SigninScreenState extends State<SigninScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(e.message.toString())));
                     } catch (e) {
+                      debugPrint(e.toString());
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content:
                               Text("something went wrong, try again later")));

@@ -46,7 +46,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
           : _isEdit = false;
       _imageUrlController.text = _editedProduct.img;
 
-      _priceController.text = _editedProduct.price.toString();
+      _editedProduct.price != 0
+          ? _priceController.text = _editedProduct.price.toString()
+          : _priceController.text = "";
       _priceFormat();
     }
     _isInit = false;
@@ -65,7 +67,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   void _priceFormat() {
     var _regexCommaDot = RegExp(r"[\,\.\ ]+");
-    debugPrint("_price Format in " + _priceController.text);
+
     try {
       if (_priceFocusNode.hasFocus) {
         _priceController.text =
@@ -91,8 +93,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   Future<void> _saveForm() async {
+    debugPrint("BERFORE FORM " + _priceController.text);
+    _priceController.text =
+        _priceController.text.replaceAll(RegExp(r"[\,\.\ ]+"), "").toString();
     _form.currentState?.validate();
     _form.currentState?.save();
+    debugPrint("AFTER FORM " + _editedProduct.price.toString());
 
     setState(() {
       _isLoading = true;
@@ -183,7 +189,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       keyboardType: TextInputType.number,
                       controller: _priceController,
                       focusNode: _priceFocusNode,
-                      //onChanged: (val){_priceController.addListener(() { });},
+                      onTap: () {
+                        debugPrint("tapping");
+                        _priceFocusNode.hasFocus
+                            ? _priceController.clear()
+                            : null;
+                      },
+
                       validator: (value) {
                         if (value!.isEmpty) {
                           return "please insert the Form";

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -23,13 +24,17 @@ class OrderItem {
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
 
+  final String? token;
+
+  Orders({this.token});
+
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> fetchAndSetOrders() async {
-    final url = Uri.parse(Firebase.urlFirebase + "/orders.json");
-
+    final url = Uri.parse(Firebase.urlFirebase + "/orders.json?auth=$token");
+    debugPrint("uri = $token");
     try {
       final response = await http.get(url);
 
@@ -61,7 +66,7 @@ class Orders with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final timeStamp = DateTime.now();
-    var url = Uri.parse(Firebase.urlFirebase + "/orders.json");
+    var url = Uri.parse(Firebase.urlFirebase + "/orders.json?auth=$token");
     try {
       final response = await http.post(url,
           body: jsonEncode({
