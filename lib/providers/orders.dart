@@ -14,31 +14,41 @@ class OrderItem {
   final List<CartItem> products;
   final DateTime dateTime;
 
-  OrderItem(
-      {required this.id,
-      required this.totalAmount,
-      required this.products,
-      required this.dateTime});
+  OrderItem({
+    required this.id,
+    required this.totalAmount,
+    required this.products,
+    required this.dateTime,
+  });
 }
 
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
 
   final String? token;
+  final String? userId;
 
-  Orders({this.token});
+  Orders({this.token, this.userId});
+
+  void Update(List<OrderItem> value) {
+    _orders = value;
+  }
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> fetchAndSetOrders() async {
-    final url = Uri.parse(Firebase.urlFirebase + "/orders.json?auth=$token");
+    debugPrint("FETCH DATA ORDERS FROM $userId");
+    final url =
+        Uri.parse(Firebase.urlFirebase + "/orders/$userId.json?auth=$token");
     debugPrint("uri = $token");
     try {
       final response = await http.get(url);
 
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.body) != null
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : {};
       _orders.clear();
       if (data.isEmpty) {
         return;
@@ -66,7 +76,8 @@ class Orders with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final timeStamp = DateTime.now();
-    var url = Uri.parse(Firebase.urlFirebase + "/orders.json?auth=$token");
+    var url =
+        Uri.parse(Firebase.urlFirebase + "/orders/$userId.json?auth=$token");
     try {
       final response = await http.post(url,
           body: jsonEncode({

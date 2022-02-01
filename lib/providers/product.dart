@@ -21,18 +21,12 @@ class Product with ChangeNotifier {
       required this.img,
       this.isFavorite = false});
 
-  Future<void> toggleFavoriteState() async {
-    var url = Uri.parse(Firebase.urlFirebase + '/products/$id.json');
+  Future<void> toggleFavoriteState(String auth, String userId) async {
+    var url = Uri.parse(
+        Firebase.urlFirebase + '/userFavorite/$userId/$id.json?auth=$auth');
     try {
       isFavorite = !isFavorite;
-      await http.patch(url,
-          body: jsonEncode(Products.productToJson(Product(
-              id: id,
-              title: title,
-              desc: desc,
-              img: img,
-              price: price,
-              isFavorite: isFavorite))));
+      await http.put(url, body: jsonEncode(isFavorite));
     } catch (e) {
       isFavorite = !isFavorite;
       throw e;

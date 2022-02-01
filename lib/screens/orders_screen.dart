@@ -32,11 +32,15 @@ class OrdersScreen extends StatelessWidget {
                   );
                 } else {
                   return Consumer<Orders>(builder: (context, orderData, child) {
-                    return ListView.builder(
-                        itemCount: orderData.orders.length,
-                        itemBuilder: (_, i) => widget.OrderItem(
-                              item: orderData.orders[i],
-                            ));
+                    return orderData.orders.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: orderData.orders.length,
+                            itemBuilder: (_, i) => widget.OrderItem(
+                                  item: orderData.orders[i],
+                                ))
+                        : Center(
+                            child: Text("You Have not Ordered Yet"),
+                          );
                   });
                 }
               }

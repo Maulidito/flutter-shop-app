@@ -9,11 +9,13 @@ class UserProductScreen extends StatelessWidget {
   const UserProductScreen({Key? key}) : super(key: key);
 
   Future<void> _refershProducts(BuildContext context) async {
-    await Provider.of<Products>(context, listen: false).fetchSetProduct();
+    await Provider.of<Products>(context, listen: false)
+        .fetchSetProduct(filterbyUser: true);
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("rebuilding...");
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Product"),
@@ -26,20 +28,36 @@ class UserProductScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () => _refershProducts(context),
-        child: Padding(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
           padding: const EdgeInsets.all(8),
-          child: Consumer<Products>(
-            builder: (ctx, product, child) => ListView.builder(
-              shrinkWrap: true,
-              itemBuilder: (_, index) {
-                return UserProductItem(
-                  title: product.items[index].title,
-                  img: product.items[index].img,
-                  id: product.items[index].id,
+          child: FutureBuilder(
+            future: _refershProducts(context),
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator.adaptive(),
                 );
-              },
-              itemCount: product.items.length,
-            ),
+              } else {
+                return Consumer<Products>(
+                  builder: (ctx, product, _) => product.items.isEmpty
+                      ? Center(
+                          child: Text("You Dont Have any Products, Makes One"))
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemBuilder: (_, index) {
+                            return UserProductItem(
+                              title: product.items[index].title,
+                              img: product.items[index].img,
+                              id: product.items[index].id,
+                            );
+                          },
+                          itemCount: product.items.length,
+                        ),
+                );
+              }
+            },
           ),
         ),
       ),

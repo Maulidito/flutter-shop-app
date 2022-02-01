@@ -53,8 +53,9 @@ class AppDrawer extends StatelessWidget {
             onTap: () async {
               try {
                 Scaffold.of(context).openEndDrawer();
-                await Provider.of<Auth>(context, listen: false).logout();
-                Navigator.of(context).pushNamed(AuthScreen.routeName);
+                await context.read<Auth>().logout();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    AuthScreen.routeName, (Route route) => false);
               } catch (e) {
                 debugPrint(e.toString());
               }

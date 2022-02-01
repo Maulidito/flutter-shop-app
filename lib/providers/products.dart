@@ -7,45 +7,67 @@ import 'product.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class Products with ChangeNotifier {
-  final List<Product> _items = [];
+  List<Product> _items = [];
   var showFavorite = false;
 
-  late final String? token;
+  final String? token;
+  final String? userId;
 
-  Products({this.token});
+  Products({
+    this.token,
+    this.userId,
+  });
 
-  void updateToken(int token) {
-    token = token;
+  // void firebaseVer() async {
+  //   DatabaseReference ref = FirebaseDatabase.instance.ref("/products");
+  //   DatabaseReference
+
+  //   DatabaseEvent event = await ref.once();
+
+  //   print(event.snapshot.value);
+  // }
+
+  void update(
+    List<Product> item,
+  ) {
+    debugPrint("Update Product Item");
+    _items = item;
   }
 
-  void firebaseVer() async {
-    DatabaseReference ref = FirebaseDatabase.instance.ref("/products");
+  Future<void> fetchSetProduct({bool filterbyUser = false}) async {
+    final filterString =
+        filterbyUser == true ? '&orderBy="creatorId"&equalTo="$userId"' : "";
+    final url = Uri.parse(
+        Firebase.urlFirebase + '/products.json?auth=$token' + filterString);
+    final urlFavorite = Uri.parse(
+        Firebase.urlFirebase + '/userFavorite/$userId.json?auth=$token');
 
-    DatabaseEvent event = await ref.once();
-
-    print(event.snapshot.value);
-  }
-
-  Future<void> fetchSetProduct() async {
-    firebaseVer();
-
-    final url = Uri.parse(Firebase.urlFirebase + '/products.json?auth=$token');
-    debugPrint("FETCHING THE PRODUCT");
+    debugPrint("FETCHING THE PRODUCT FILTER = $filterbyUser" + url.toString());
     try {
       final response = await http.get(url);
+      final responseFavorite = await http.get(urlFavorite);
       final rawData = jsonDecode(response.body) as Map<String, dynamic>;
-      debugPrint(" raw data : ${rawData.toString()}");
+
+      final dataFavorite = jsonDecode(responseFavorite.body) != null
+          ? jsonDecode(responseFavorite.body) as Map<String, dynamic>
+          : {};
+
+      debugPrint(
+          "FETCHING THE PRODUCT ${responseFavorite.body} \n Check data Favorite ${dataFavorite.isNotEmpty}");
       _items.clear();
       rawData.forEach((prodId, value) {
+        bool isFavorite =
+            dataFavorite.isNotEmpty ? dataFavorite[prodId] ?? false : false;
         _items.add(Product(
             id: prodId,
             title: value["title"],
             desc: value["description"],
             img: value["image"],
             price: value["price"],
-            isFavorite: value["isFavorite"]));
+            isFavorite: isFavorite));
       });
     } catch (e) {
+      debugPrint(e.toString());
       throw e;
     } finally {
       notifyListeners();
@@ -73,7 +95,6 @@ class Products with ChangeNotifier {
       "price": prod.price,
       "description": prod.desc,
       "image": prod.img,
-      "isFavorite": prod.isFavorite
     };
   }
 
@@ -88,8 +109,9 @@ class Products with ChangeNotifier {
           desc: prod.desc,
           id: DateTime.now().toString());
 
-      final response =
-          await http.post(url, body: json.encode(productToJson(newProduct)));
+      final response = await http.post(url,
+          body:
+              json.encode({...productToJson(newProduct), "creatorId": userId}));
 
       _items.add(Product(
           title: prod.title,
@@ -107,7 +129,10 @@ class Products with ChangeNotifier {
   Future<void> deleteProduct(String id) async {
     final url =
         Uri.parse(Firebase.urlFirebase + '/products/$id.json?auth=$token');
+    final urlFavorite = Uri.parse(
+        Firebase.urlFirebase + '/userFavorite/$userId/$id.json?auth=$token');
     try {
+      await http.delete(urlFavorite);
       await http.delete(url).then((value) {
         _items.removeWhere((element) => element.id == id);
       });
@@ -126,6 +151,7 @@ class Products with ChangeNotifier {
       if (prodIndex >= 0) {
         final url = Uri.parse(
             Firebase.urlFirebase + '/products/${prod.id}.json?auth=$token');
+
         await http.patch(url, body: jsonEncode(productToJson(prod)));
         _items[prodIndex] = prod;
       } else {

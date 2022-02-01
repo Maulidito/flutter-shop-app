@@ -13,12 +13,35 @@ class SigninScreen extends StatefulWidget {
   _SigninScreenState createState() => _SigninScreenState();
 }
 
-class _SigninScreenState extends State<SigninScreen> {
+class _SigninScreenState extends State<SigninScreen>
+    with TickerProviderStateMixin {
   final GlobalKey<FormState> _form = GlobalKey<FormState>();
   Map<String, String> _dataForm = {"password": "", "email": ""};
+  late AnimationController controllArrow;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    controllArrow =
+        AnimationController(duration: Duration(seconds: 1), vsync: this);
+    animation = Tween(begin: 0.0, end: 20.0).animate(controllArrow);
+
+    controllArrow.repeat(reverse: true);
+
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    controllArrow.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("signIn Screen Building...");
     final _height = MediaQuery.of(context).size.height;
     final _width = MediaQuery.of(context).size.width;
     return Form(
@@ -82,12 +105,10 @@ class _SigninScreenState extends State<SigninScreen> {
                   onPressed: () async {
                     _form.currentState?.save();
 
-                    debugPrint(_dataForm.toString());
-
                     try {
-                      await Provider.of<Auth>(context, listen: false).login(
-                          _dataForm["email"] ?? "",
+                      await context.read<Auth>().login(_dataForm["email"] ?? "",
                           _dataForm["password"] ?? "");
+
                       Navigator.of(context).pushReplacementNamed(
                           ProductOverviewScreen.routeName);
                     } on FirebaseAuthException catch (e) {
@@ -109,10 +130,20 @@ class _SigninScreenState extends State<SigninScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("Swipe Right to Sign Up"),
-                  Icon(
-                    Icons.arrow_right_alt_rounded,
-                    color: Colors.white,
-                    size: 50,
+                  AnimatedBuilder(
+                    animation: animation,
+                    builder: (ctx, ch) {
+                      return Container(
+                        width: 50,
+                        padding: EdgeInsets.fromLTRB(animation.value, 0, 0, 0),
+                        child: ch,
+                      );
+                    },
+                    child: const Icon(
+                      Icons.arrow_right_alt_rounded,
+                      color: Colors.white,
+                      size: 50,
+                    ),
                   )
                 ],
               )
