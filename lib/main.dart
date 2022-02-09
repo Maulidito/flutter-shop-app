@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_app/helpers/custom_route.dart';
 import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/providers/orders.dart';
@@ -57,10 +58,14 @@ class MyApp extends StatelessWidget {
             fontFamily: "Lato",
             textTheme:
                 const TextTheme(headline1: TextStyle(color: Colors.white)),
-            colorScheme: ColorScheme.fromSwatch(
-              primarySwatch: Colors.purple,
-              accentColor: Colors.deepOrange,
-            ).copyWith()),
+            colorScheme: ColorScheme.fromSeed(
+                    seedColor: Colors.purple,
+                    secondary: Colors.deepOrange,
+                    brightness: Brightness.light)
+                .copyWith(),
+            pageTransitionsTheme: PageTransitionsTheme(builders: {
+              TargetPlatform.android: CustomPageTransitionBuilder()
+            })),
         home: AuthenticationWrapper(),
         routes: {
           ProductOverviewScreen.routeName: (_) => ProductOverviewScreen(),

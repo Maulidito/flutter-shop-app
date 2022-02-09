@@ -35,40 +35,38 @@ class _OrderItemState extends State<OrderItem> {
               },
             ),
           ),
-          if (_expandState)
-            (Container(
-              height: min(widget.item.products.length * 20 + 50, 180),
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                children: widget.item.products
-                    .map((prod) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    prod.title,
-                                    style: const TextStyle(fontFamily: "Anton"),
-                                  ),
-                                  Text('${prod.quantity} x \$${prod.price}')
-                                ],
-                              ),
-                              const Divider(
-                                height: 20,
-                                indent: 50,
-                                endIndent: 50,
-                              )
-                            ],
-                          ),
-                        ))
-                    .toList(),
-              ),
-            ))
-          else
-            (Container())
+          (AnimatedContainer(
+            curve: Curves.fastOutSlowIn,
+            duration: Duration(milliseconds: 500),
+            height: _expandState ? widget.item.products.length * 20 + 50 : 0,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              children: widget.item.products
+                  .map((prod) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  prod.title,
+                                  style: const TextStyle(fontFamily: "Anton"),
+                                ),
+                                Text('${prod.quantity} x \$${prod.price}')
+                              ],
+                            ),
+                            const Divider(
+                              height: 20,
+                              indent: 50,
+                              endIndent: 50,
+                            )
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ))
         ],
       ),
     );
